@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id
+  email        String         @unique
+  ClassRooms   ClassRoom[]
+  Post         Post[]
+  ClassRoomsIn ClassRoomsIn[]
+}
+
+model ClassRoom {
+  id           String         @id
+  createdBy    User           @relation(fields: [createdById], references: [id])
+  createdById  String
+  title        String
+  Post         Post[]
+  ClassRoomsIn ClassRoomsIn[]
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+}
+
+model ClassRoomsIn {
+  id          String    @id
+  classRoom   ClassRoom @relation(fields: [classRoomId], references: [id])
+  classRoomId String
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String
+  role        Role      @default(STUDENT)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Post {
+  id          String     @id
+  createdBy   User       @relation(fields: [createdById], references: [id])
+  createdById String
+  message     String
+  classRoom   ClassRoom? @relation(fields: [classRoomId], references: [id])
+  classRoomId String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
