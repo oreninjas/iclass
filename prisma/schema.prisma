@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -14,21 +14,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id           String         @id
-  email        String         @unique
-  ClassRooms   ClassRoom[]
-  Post         Post[]
-  ClassRoomsIn ClassRoomsIn[]
-}
+// If needed will add later
+// model User {
+//   id      String      @id
+//   email   String      @unique
+//   Classroom Classroom[]
+//   Post      Post[]
+//   ClassIn   ClassIn[]
+// }
 
-model ClassRoom {
-  id           String         @id
-  createdBy    User           @relation(fields: [createdById], references: [id])
-  createdById  String
-  title        String
-  Post         Post[]
-  ClassRoomsIn ClassRoomsIn[]
+model Classroom {
+  id        String    @id @default(cuid())
+  createdBy String
+  title     String
+  Post      Post[]
+  ClassIn   ClassIn[]
 }
 
 enum Role {
@@ -36,24 +36,24 @@ enum Role {
   TEACHER
 }
 
-model ClassRoomsIn {
-  id          String    @id
-  classRoom   ClassRoom @relation(fields: [classRoomId], references: [id])
-  classRoomId String
-  user        User      @relation(fields: [userId], references: [id])
-  userId      String
-  role        Role      @default(STUDENT)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+model ClassIn {
+  class     Classroom @relation(fields: [classId], references: [id])
+  classId   String
+  userId    String
+  role      Role      @default(STUDENT)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@id([classId, userId])
 }
 
 model Post {
-  id          String     @id
-  createdBy   User       @relation(fields: [createdById], references: [id])
+  id          String    @id
+  createdBy   String
   createdById String
   message     String
-  classRoom   ClassRoom? @relation(fields: [classRoomId], references: [id])
-  classRoomId String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  class       Classroom @relation(fields: [classId], references: [id])
+  classId     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
