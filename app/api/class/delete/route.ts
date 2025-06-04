@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-export default async function DELETE(request: Request) {
+export async function DELETE(request: Request) {
   try {
     const user = await currentUser();
     if (!user) {
