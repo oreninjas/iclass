@@ -1,17 +1,17 @@
+import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
 
-export default async function POST(req: Request) {
+export async function POST(req: Request) {
   try {
     const user = await currentUser();
     const { title } = await req.json();
 
     if (!user) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    let classroom = await prisma.classroom.create({
+    const classroom = await prisma.classroom.create({
       data: { title, createdBy: user.id },
     });
 
@@ -23,8 +23,15 @@ export default async function POST(req: Request) {
       },
     });
 
-    return new NextResponse("Class created successfully", { status: 201 });
-  } catch (error) {
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return NextResponse.json(
+      { message: "Class created successfully", id: classroom.id },
+      { status: 201 }
+    );
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
